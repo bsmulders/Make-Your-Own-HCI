@@ -63,6 +63,7 @@ public class MarkerSearcher {
   private void initNyAR(PApplet parent, String cParam) {
     setNyAR(new MultiMarker(parent, getWidth(), getHeight(), cParam, NyAR4PsgConfig.CONFIG_DEFAULT));
     getNyAR().setLostDelay(5);
+    getNyAR().setConfidenceThreshold(0.8);
   }
 
   private void loadPatterns(String patternPath) {
