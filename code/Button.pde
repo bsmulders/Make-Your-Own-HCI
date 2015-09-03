@@ -15,8 +15,9 @@ public class Button {
   private MarkerPosition start;
   private MarkerPosition end;
   private MarkerPosition current;
-  private ButtonType type;
+  private ButtonType type = ButtonType.UNDEFINED;
   private int value;
+  private int appearances = 0;
 
   public Button() {
   }
@@ -39,7 +40,6 @@ public class Button {
 
   public void setEnd(MarkerPosition end) {
     this.end = end;
-    setType(calculateType());
   }
 
   public MarkerPosition getCurrent() {
@@ -67,9 +67,39 @@ public class Button {
     this.type = type;
   }
 
+  public int getAppearances() {
+    return appearances;
+  }
+
+  public void addCalibrationPosition(MarkerPosition mp) {
+    setCurrent(mp);
+    appearances++;
+
+    if (getStart() == null) {
+      setStart(mp);
+    } else if (getEnd() == null) {
+      setEnd(mp);
+    } else {
+      float startToEndDistance = dist(getStart().getX(), getStart().getY(), getEnd().getX(), getEnd().getY());
+      float distanceToStart = dist(getStart().getX(), getStart().getY(), mp.getX(), mp.getY());
+      float distanceToEnd = dist(getEnd().getX(), getEnd().getY(), mp.getX(), mp.getY());
+
+      if (distanceToStart > startToEndDistance || distanceToEnd > startToEndDistance) {
+        if (distanceToStart < distanceToEnd) {
+          setStart(mp);
+        } else if (distanceToEnd <= distanceToStart) {
+          setEnd(mp);
+        }
+        setType(calculateType());
+      }
+    }
+  }
+
   private ButtonType calculateType() {
     float dDiff = dist(getStart().getX(), getStart().getY(), getEnd().getX(), getEnd().getY());
-    float rDiff = abs(getStart().getRotation() - getEnd().getRotation());
+    float rDiff = getStart().getRotation() - getEnd().getRotation();
+    while (rDiff < -180) rDiff += 360;
+    while (rDiff > 180) rDiff -= 360;
 
     if (rDiff > 30)
       return ButtonType.KNOB; 
@@ -78,8 +108,8 @@ public class Button {
     else if (dDiff > 0.11)
       return ButtonType.SLIDER;
     else 
-      return ButtonType.UNDEFINED;
-  } 
+    return ButtonType.UNDEFINED;
+  }
 
   private int calculateValue() {    
     switch(type) {
@@ -117,4 +147,3 @@ public class Button {
     return int( (distanceStart / distanceTotal) * 100.0 );
   }
 }
-

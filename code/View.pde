@@ -37,13 +37,8 @@ public class View {
     drawHUD();
 
     switch(getModel().getProgramState()) {
-    case START_POSITIONS:
-      drawStartPositions();
-      break;
-    case END_POSITIONS:
-    case CLEANUP:
-      drawStartPositions();
-      drawEndPositions();
+    case CALIBRATING:
+      drawButtons();
       drawTypeLabel();
       break;
     case CALIBRATED:
@@ -66,16 +61,14 @@ public class View {
       for (int col = 0; col < width; col += 30) {
         line(col, 0, col, height);
       }
-    }
-    else {
+    } else {
       PImage bg = getModel().getWebcam().getLastCapture();
       if (bg != null) {        
         pushMatrix();
         scale(1.0, -1.0);
         image(bg, 0, -height, width, height);
         popMatrix();
-      } 
-      else {
+      } else {
         background(128);
       }
     }
@@ -86,36 +79,7 @@ public class View {
     textSize(26);
     fill(255);
 
-    text("Program state:\n" + getModel().getProgramStateText(), width/2, height-80);
-  }
-
-  private void drawStartPositions() {
-    rectMode(CENTER);
-    fill(0, 255, 0);
-    stroke(0);
-
-    for (Button button : getModel().getButtons()) {
-      if (button!= null && button.getStart() != null) {
-        int startX = int(button.getStart().getX() * width);
-        int startY = int(button.getStart().getY() * height);
-        ellipse(startX, startY, 30, 30);
-      }
-    }
-  }
-
-  private void drawEndPositions() {
-    rectMode(CENTER);
-    strokeWeight(2);
-    fill(255, 0, 0);
-    stroke(0);
-
-    for (Button button : getModel().getButtons()) {
-      if (button != null && button.getEnd() != null) {
-        int startX = int(button.getEnd().getX() * width);
-        int startY = int(button.getEnd().getY() * height);
-        ellipse(startX, startY, 30, 30);
-      }
-    }
+    text(getModel().getProgramStateText(), width/2, height-40);
   }
 
   private void drawTypeLabel() {
@@ -180,7 +144,7 @@ public class View {
 
   private void drawButtons() {
     for (Button button : getModel().getButtons()) {
-      if (button != null && button.getCurrent() != null) {  
+      if (button != null && button.getCurrent() != null) {
         switch(button.getType()) {
         case KNOB:       
           drawKnobButton(button);       

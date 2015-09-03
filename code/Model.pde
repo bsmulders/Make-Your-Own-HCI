@@ -21,8 +21,9 @@ public class Model {
   private MarkerSearcher markerSearcher;
   private Webcam webcam;
   private Button[] buttons;
-  private ProgramState programState;
+  private ProgramState programState = ProgramState.AWAITING_CALIBRATION;
   private boolean displayBackground;
+  private int calibrationCaptures;
 
   private Box2DProcessing box2d;
   private Mover[] movers;
@@ -105,18 +106,24 @@ public class Model {
     this.programState = programState;
   }
 
+  public int getCalibrationCaptures() {
+    return calibrationCaptures;
+  }
+
+  private void setCalibrationCaptures(int calibrationCaptures) {
+    this.calibrationCaptures = calibrationCaptures;
+  }
+
   public String getProgramStateText() {
     switch(getProgramState()) {
     case AWAITING_CALIBRATION:
-      return "Awaiting calibration";
-    case START_POSITIONS:
-      return "Calibrating start positions";
-    case END_POSITIONS:
-      return "Calibrating end positions";
+      return "Click to calibrate buttons";
+    case CALIBRATING:
+      return "Move buttons until they are properly recognized, click when finished";
     case CLEANUP:
       return "Cleaning up";
     case CALIBRATED:
-      return "Calibrated";
+      return "Click to re-calibrate buttons";
     default:
       return "Undefined state";
     }
@@ -125,12 +132,9 @@ public class Model {
   public void nextProgramState() {
     switch(getProgramState()) {
     case AWAITING_CALIBRATION:
-      setProgramState(ProgramState.START_POSITIONS);
+      setProgramState(ProgramState.CALIBRATING);
       break;
-    case START_POSITIONS:
-      setProgramState(ProgramState.END_POSITIONS);
-      break;
-    case END_POSITIONS:
+    case CALIBRATING:
       setProgramState(ProgramState.CLEANUP);
       break;
     case CLEANUP:
@@ -138,6 +142,7 @@ public class Model {
       break;
     case CALIBRATED:
       initModel();
+      setProgramState(ProgramState.CALIBRATING);
       break;
     }
   }
@@ -172,7 +177,7 @@ public class Model {
 
   private void initModel() {
     setButtons(new Button[getMarkerSearcher().getMarkerCount()]);
-    setProgramState(ProgramState.AWAITING_CALIBRATION);
+    setCalibrationCaptures(0);
     setDisplayBackground(true);
     setMovers(new Mover[25]);
     setAttractors(new Attractor[getMarkerSearcher().getMarkerCount()]);
@@ -200,11 +205,8 @@ public class Model {
         updateCamera();
       }
       break;
-    case START_POSITIONS:
-      setStartPositions();
-      break;
-    case END_POSITIONS:
-      setEndPositions();
+    case CALIBRATING:
+      updateCalibrationPositions();
       break;
     case CLEANUP:
       cleanupCalibration();
@@ -221,15 +223,20 @@ public class Model {
     getWebcam().getCameraImage();
   }
 
-  private void setStartPositions() {
+  private void updateCalibrationPositions() {
     PImage capture = getWebcam().getCameraImage();
     MarkerPosition[] mps = getMarkerSearcher().getMarkerLocations(capture);    
 
     for (int i = 0; i < mps.length; i++) {
       if (mps[i] != null) {
-        setButton(i, new Button(mps[i]));
+        if (getButton(i) == null) {
+          setButton(i, new Button(mps[i]));
+        }
+        getButton(i).addCalibrationPosition(mps[i]);
       }
     }
+
+    calibrationCaptures++;
   }
 
   private void setEndPositions() {
@@ -254,14 +261,12 @@ public class Model {
 
         if (button.getType() == ButtonType.KNOB) {
           getAttractor(i).setForce(button.getValue());
-        } 
-        else if (button.getType() == ButtonType.TOGGLE) {
+        } else if (button.getType() == ButtonType.TOGGLE) {
           if (button.getValue() == 1)
             setMagnetState(MagnetState.ATTRACTING);
           else if (button.getValue() == 2)
             setMagnetState(MagnetState.REPULSING);
-        } 
-        else if (button.getType() == ButtonType.SLIDER) {
+        } else if (button.getType() == ButtonType.SLIDER) {
           getBox2D().setGravity(0.0, button.getValue() * -1);
         }
       }
@@ -271,11 +276,12 @@ public class Model {
   private void cleanupCalibration() {
     for (int i = 0; i < getButtonAmount(); i++) {
       Button button = getButton(i);
-      if (button == null || button.getStart() == null || button.getEnd() == null) {
-        setButton(i, null);
-      } 
-      else if (button.getType() == ButtonType.KNOB) {
-        setAttractor(i, new Attractor(button.getStart().getX() * width, button.getStart().getY() * height, box2d));
+      if (button != null) {
+        if (button.getAppearances() / getCalibrationCaptures() < 0.1) {
+          setButton(i, null);
+        } else if (button.getType() == ButtonType.KNOB) {
+          setAttractor(i, new Attractor(button.getStart().getX() * width, button.getStart().getY() * height, box2d));
+        }
       }
     }
   }
@@ -293,4 +299,3 @@ public class Model {
     }
   }
 }
-
