@@ -126,7 +126,7 @@ public class View {
     for (Button button : getModel().getButtons()) {
       if (button!= null && button.getType() != null) {
         int startX = int(button.getStart().getX() * width);
-        int startY = int(button.getStart().getY() * height) + 40;
+        int startY = int(button.getStart().getY() * height) - 40;
 
         switch(button.getType()) {
         case KNOB:       
@@ -275,8 +275,6 @@ public class View {
   }
 
   private void drawUndefinedButton(Button button) {
-    textAlign(CENTER);
-    textSize(16);
     rectMode(CENTER);
     strokeWeight(3);
     stroke(0);
@@ -286,7 +284,5 @@ public class View {
 
     fill(100, 0, 0);    
     rect(startX, startY, 50, 50);
-    fill(255);
-    text("Unclear type", startX, startY+40);
   }
 }
