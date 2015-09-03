@@ -60,18 +60,4 @@ public class Webcam {
 
     return getLastCapture();
   }
-
-  public PImage flipImage(PImage img) {
-    PImage result = new PImage(img.width, img.height);
-    img.loadPixels();
-
-    for (int i = 0; i < img.pixels.length; i++) {
-      int mod = i % img.width;
-      int x = ((img.width - mod - 1) + i) - mod;
-      result.pixels[i] = img.pixels[x];
-    } 
-
-    return result;
-  }
 }
-

@@ -69,9 +69,11 @@ public class View {
     }
     else {
       PImage bg = getModel().getWebcam().getLastCapture();
-      if (bg != null) {
-        PImage bg2 = getModel().getWebcam().flipImage(bg);
-        image(bg2, 0, 0, width, height);
+      if (bg != null) {        
+        pushMatrix();
+        scale(1.0, -1.0);
+        image(bg, 0, -height, width, height);
+        popMatrix();
       } 
       else {
         background(128);
@@ -288,4 +290,3 @@ public class View {
     text("Unclear type", startX, startY+40);
   }
 }
-

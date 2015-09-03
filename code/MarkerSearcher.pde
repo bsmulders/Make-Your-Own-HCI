@@ -90,8 +90,8 @@ public class MarkerSearcher {
   private MarkerPosition getMarkerPosition(PVector[] pvs) {
     int x = int((pvs[0].x + pvs[2].x)/2);
     int y = int((pvs[0].y + pvs[2].y)/2);
-    float relX = norm(x, 0, width);
-    float relY = norm(y, 0, height);
+    float relX = norm(x, width, 0);
+    float relY = norm(y, height, 0);
     float rot = degrees(atan2(pvs[1].y-pvs[0].y, pvs[1].x-pvs[0].x)); 
     rot = (rot < 0) ? 360 + rot : rot;
     return new MarkerPosition(relX, relY, rot);
@@ -108,4 +108,3 @@ public class MarkerSearcher {
     return folder.list(pattFilter);
   }
 }
-
