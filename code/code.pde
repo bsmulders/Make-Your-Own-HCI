@@ -29,7 +29,6 @@ void draw() {
   view.drawScreen();
 }
 
-void keyPressed() {
-  controller.keyPress();
+void mousePressed() {
+  controller.mousePress();
 }
-

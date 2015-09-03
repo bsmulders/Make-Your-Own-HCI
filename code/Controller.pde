@@ -35,13 +35,12 @@ public class Controller {
     this.view = view;
   }
 
-  public void keyPress() {
-    if (key == 'V' || key == 'v') {
+  public void mousePress() {
+    if (mouseButton == RIGHT) {
       getModel().toggleBackground();
     }
-    else if (key == 'C' || key == 'c') {
+    else if (mouseButton == LEFT) {
       getModel().nextProgramState();
     }
   }
 }
-
