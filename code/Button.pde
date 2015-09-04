@@ -84,12 +84,11 @@ public class Button {
       float distanceToStart = dist(getStart().getX(), getStart().getY(), mp.getX(), mp.getY());
       float distanceToEnd = dist(getEnd().getX(), getEnd().getY(), mp.getX(), mp.getY());
 
-      if (distanceToStart > startToEndDistance || distanceToEnd > startToEndDistance) {
-        if (distanceToStart < distanceToEnd) {
-          setStart(mp);
-        } else if (distanceToEnd <= distanceToStart) {
-          setEnd(mp);
-        }
+      if (distanceToStart > startToEndDistance) {
+        setEnd(mp);        
+        setType(calculateType());
+      } else if (distanceToEnd > startToEndDistance) {
+        setStart(mp);
         setType(calculateType());
       }
     }
